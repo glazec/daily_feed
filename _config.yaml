@@ -1,0 +1,36 @@
+## Google cloud Function的环境变量只支持String
+
+#纪念日开始的日子
+startDay: "2018/10/17"
+#当地拼音,需要在下面的墨迹天气url确认
+local: "zhejiang/ningbo"
+#邮件服务商 可选值为SMTP或sendGrid
+emailDelivery: "sendGrid"
+
+#若邮件服务商为SMTP
+#邮件厂商：如126
+SMTPEmailService: ""
+#发送者邮箱账户SMTP授权码
+#例如xx@126.com
+SMTPEmailAuthUser: ""
+SMTPEmailAuthPass: ""
+
+#若邮件服务商为sendGrid
+SENDGRID_API_KEY: 'yourApiKey'
+
+emailFrom: ''
+emailTo:  ""
+emailSubject: ''
+
+#是否定时发送
+schedule: 'false'
+
+#每日发送时间 type
+emailHour: '5'
+emialMinminute: '20'
+
+# confirmation mail的发送地址
+confirmTo: ''
+
+# 托管chart的地方（即用来填写昨日反馈）
+httpPageUrl: ''
