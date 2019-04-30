@@ -1,12 +1,4 @@
-const sgMail = require("@sendgrid/mail");
-const superagent = require("superagent"); //发送网络请求获取DOM
 const cheerio = require("cheerio"); //能够像Jquery一样方便获取DOM节点
-const nodemailer = require("nodemailer"); //发送邮件的node插件
-const ejs = require("ejs"); //ejs模版引擎
-const fs = require("fs"); //文件读写
-const path = require("path"); //路径配置
-const schedule = require("node-schedule"); //定时器任务库
-yaml = require("js-yaml"); //读取yaml配置文件
 const axios = require("axios");
 
 module.exports = function guanzhi() {
