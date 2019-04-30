@@ -1,4 +1,4 @@
-const sgMail = require('@sendgrid/mail');
+const sgMail = require("@sendgrid/mail");
 const superagent = require("superagent"); //发送网络请求获取DOM
 const cheerio = require("cheerio"); //能够像Jquery一样方便获取DOM节点
 const nodemailer = require("nodemailer"); //发送邮件的node插件
@@ -6,21 +6,23 @@ const ejs = require("ejs"); //ejs模版引擎
 const fs = require("fs"); //文件读写
 const path = require("path"); //路径配置
 const schedule = require("node-schedule"); //定时器任务库
-yaml = require('js-yaml'); //读取yaml配置文件
+const yaml = require("js-yaml"); //读取yaml配置文件
+const guanzhi = require("./guanzhi");
 //配置项
 
 //读取配置
 try {
-  var doc = yaml.safeLoad(fs.readFileSync('../_config.yaml', 'utf8'));
+  var doc = yaml.safeLoad(fs.readFileSync("../_config.yaml", "utf8"));
   console.log(doc);
 } catch (e) {
   console.log(e);
 }
 
 //昨日回顾
-let yesterday = '就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天'
+let yesterday =
+  "就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天就这样昨天";
 //昨日评价
-let yesterdayRate = 'A+'
+let yesterdayRate = "A+";
 
 //纪念日
 let startDay = doc.startDay;
@@ -32,58 +34,55 @@ switch (doc.emailDelivery) {
     //发送者邮箱厂家
     var emailService = doc.SMTPEmailService;
     //发送者邮箱账户SMTP授权码
-    var EamilAuth = { user: doc.SMTPEmailAuthUser, pass: doc.SMTPEmailAuthPass }
-    break
+    var EamilAuth = {
+      user: doc.SMTPEmailAuthUser,
+      pass: doc.SMTPEmailAuthPass
+    };
+    break;
   case "sendGrid":
-    var SENDGRID_API_KEY = doc.SENDGRID_API_KEY
-    break
+    var SENDGRID_API_KEY = doc.SENDGRID_API_KEY;
+    break;
 }
 
 //发送者昵称与邮箱地址
-let EmailFrom = doc.emailFrom
+let EmailFrom = doc.emailFrom;
 
 //接收者邮箱地
-let EmailTo = doc.emailTo
+let EmailTo = doc.emailTo;
 //邮件主题
-let EmailSubject = doc.emailSubject
+let EmailSubject = doc.emailSubject;
 
-if (doc.schedule=='true') {
+if (doc.schedule == "true") {
   //每日发送时间
-  var EmailHour = parseInt(doc.emailHour)
+  var EmailHour = parseInt(doc.emailHour);
   var EmialMinminute = parseInt(doc.emialMinminute);
 }
-
 
 // 爬取数据的url
 const OneUrl = "http://wufazhuce.com/";
 const WeatherUrl = "https://tianqi.moji.com/weather/china/" + local;
-let PoetUrl = "https://api.gushi.ci/all"
+let PoetUrl = "https://api.gushi.ci/all";
 
 // 获取古诗词,用作邮件的title
 
-function getPoet(){
-  let p = new Promise(
-      function(resolve,reject){
-          superagent.get(PoetUrl).end(
-              function(err,res){
-                  if(err){
-                      reject(err)
-                  }
-                  let raw = JSON.parse(res.text)
-                  // console.log('raw data: '+JSON.stringify(raw))
-                  resolve(raw.content)
-              }
-          )
-      
-  }
-  )
-  return p
-  }
+function getPoet() {
+  let p = new Promise(function(resolve, reject) {
+    superagent.get(PoetUrl).end(function(err, res) {
+      if (err) {
+        reject(err);
+      }
+      let raw = JSON.parse(res.text);
+      // console.log('raw data: '+JSON.stringify(raw))
+      resolve(raw.content);
+    });
+  });
+  return p;
+}
 
 // 获取ONE内容
 function getOneData() {
-  let p = new Promise(function (resolve, reject) {
-    superagent.get(OneUrl).end(function (err, res) {
+  let p = new Promise(function(resolve, reject) {
+    superagent.get(OneUrl).end(function(err, res) {
       if (err) {
         reject(err);
       }
@@ -103,44 +102,44 @@ function getOneData() {
           .text()
           .replace(/(^\s*)|(\s*$)/g, "")
       };
-      resolve(todayOneData)
+      resolve(todayOneData);
     });
-  })
-  return p
+  });
+  return p;
 }
 
 // 获取天气提醒
 function getWeatherTips() {
-  let p = new Promise(function (resolve, reject) {
-    superagent.get(WeatherUrl).end(function (err, res) {
+  let p = new Promise(function(resolve, reject) {
+    superagent.get(WeatherUrl).end(function(err, res) {
       if (err) {
         reject(err);
       }
       let threeDaysData = [];
       let weatherTip = "";
       let $ = cheerio.load(res.text);
-      $(".wea_tips").each(function (i, elem) {
+      $(".wea_tips").each(function(i, elem) {
         weatherTip = $(elem)
           .find("em")
           .text();
       });
-      resolve(weatherTip)
+      resolve(weatherTip);
     });
-  })
-  return p
+  });
+  return p;
 }
 
 // 获取天气预报
 function getWeatherData() {
-  let p = new Promise(function (resolve, reject) {
-    superagent.get(WeatherUrl).end(function (err, res) {
+  let p = new Promise(function(resolve, reject) {
+    superagent.get(WeatherUrl).end(function(err, res) {
       if (err) {
         reject(err);
       }
       let threeDaysData = [];
       let weatherTip = "";
       let $ = cheerio.load(res.text);
-      $(".forecast .days").each(function (i, elem) {
+      $(".forecast .days").each(function(i, elem) {
         const SingleDay = $(elem).find("li");
         threeDaysData.push({
           Day: $(SingleDay[0])
@@ -171,10 +170,10 @@ function getWeatherData() {
             .attr("class")
         });
       });
-      resolve(threeDaysData)
+      resolve(threeDaysData);
     });
   });
-  return p
+  return p;
 }
 
 // 发动邮件
@@ -208,7 +207,9 @@ function sendMail(HtmlData) {
 }
 
 //通过sendGrid进行email 发送
-function sendMailViaSendGrid(HtmlData,title) {
+function sendMailViaSendGrid(HtmlData) {
+  let title = HtmlData.subject;
+  console.log(title);
   const template = ejs.compile(
     fs.readFileSync(path.resolve(__dirname, "email.ejs"), "utf8")
   );
@@ -219,9 +220,11 @@ function sendMailViaSendGrid(HtmlData,title) {
     to: EmailTo,
     from: EmailFrom,
     subject: title,
-    html: html,
+    html: html
   };
-  sgMail.send(msg).then(() => { console.log('send to ' + EmailTo) })
+  sgMail.send(msg).then(() => {
+    console.log("send to " + EmailTo);
+  });
 }
 
 // 聚合
@@ -229,7 +232,7 @@ function getAllDataAndSendMail() {
   let HtmlData = {};
   // how long with
   let today = new Date();
-  console.log(today)
+  console.log(today);
   let initDay = new Date(startDay);
   let lastDay = Math.floor((today - initDay) / 1000 / 60 / 60 / 24);
   let todaystr =
@@ -241,40 +244,47 @@ function getAllDataAndSendMail() {
   HtmlData["lastDay"] = lastDay;
   HtmlData["todaystr"] = todaystr;
   HtmlData["yesterDay"] = yesterday;
-  HtmlData["yesterDayRate"] =yesterdayRate;
+  HtmlData["yesterDayRate"] = yesterdayRate;
 
-  Promise.all([getOneData(), getWeatherTips(), getWeatherData(),getPoet()]).then(
-    function (data) {
+  Promise.all([
+    getOneData(),
+    getWeatherTips(),
+    getWeatherData(),
+    getPoet(),
+    guanzhi()
+  ])
+    .then(function(data) {
       HtmlData["todayOneData"] = data[0];
       HtmlData["weatherTip"] = data[1];
       HtmlData["threeDaysData"] = data[2];
+      HtmlData["subject"] = data[3];
+      HtmlData["feed"] = [];
+      HtmlData["feed"][0] = data[4];
       switch (doc.emailDelivery) {
-        case 'SMTP':
-          sendMail(HtmlData)
-          break
-        case 'sendGrid':
-          sendMailViaSendGrid(HtmlData,data[3])
-          break
+        case "SMTP":
+          sendMail(HtmlData);
+          break;
+        case "sendGrid":
+          sendMailViaSendGrid(HtmlData);
+          break;
       }
-    }
-  ).catch(function (err) {
-    getAllDataAndSendMail() //再次获取
-    console.log('获取数据失败： ', err);
-  })
+    })
+    .catch(function(err) {
+      getAllDataAndSendMail(); //再次获取
+      console.log("获取数据失败： ", err);
+    });
 }
 
-if (doc.schedule=='true') {
+if (doc.schedule == "true") {
   let rule = new schedule.RecurrenceRule();
   rule.dayOfWeek = [0, new schedule.Range(1, 6)];
   rule.hour = EmailHour;
   rule.minute = EmialMinminute;
-  console.log('NodeMail: 开始等待目标时刻...')
-  let j = schedule.scheduleJob(rule, function () {
+  console.log("NodeMail: 开始等待目标时刻...");
+  let j = schedule.scheduleJob(rule, function() {
     console.log("执行任务");
     getAllDataAndSendMail();
   });
-}
-else {
+} else {
   getAllDataAndSendMail();
 }
-
