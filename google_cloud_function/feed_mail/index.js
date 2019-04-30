@@ -1,20 +1,20 @@
 exports.feedMail = async (req, res) => {
-  const sgMail = require('@sendgrid/mail');
+  const sgMail = require("@sendgrid/mail");
   const superagent = require("superagent"); //发送网络请求获取DOM
   const cheerio = require("cheerio"); //能够像Jquery一样方便获取DOM节点
   const nodemailer = require("nodemailer"); //发送邮件的node插件
   const ejs = require("ejs"); //ejs模版引擎
   const fs = require("fs"); //文件读写
   const path = require("path"); //路径配置
+  const guanzhi = require("./guanzhi");
   //配置项
 
-
   //昨日回顾
-  let yesterday = req.body.yesterDay
+  let yesterday = req.body.yesterDay;
   //昨日评价
-  let yesterdayRate = req.body.yesterDayRate
+  let yesterdayRate = req.body.yesterDayRate;
 
-  var doc = process.env
+  var doc = process.env;
   //纪念日
   let startDay = doc.startDay;
   //当地拼音,需要在下面的墨迹天气url确认
@@ -25,54 +25,49 @@ exports.feedMail = async (req, res) => {
       //发送者邮箱厂家
       var emailService = doc.SMTPEmailService;
       //发送者邮箱账户SMTP授权码
-      var EamilAuth = { user: doc.SMTPEmailAuthUser, pass: doc.SMTPEmailAuthPass }
-      break
+      var EamilAuth = {
+        user: doc.SMTPEmailAuthUser,
+        pass: doc.SMTPEmailAuthPass
+      };
+      break;
     case "sendGrid":
-      var SENDGRID_API_KEY = doc.SENDGRID_API_KEY
-      break
+      var SENDGRID_API_KEY = doc.SENDGRID_API_KEY;
+      break;
   }
 
   //发送者昵称与邮箱地址
-  let EmailFrom = doc.emailFrom
+  let EmailFrom = doc.emailFrom;
 
   //接收者邮箱地
-  let EmailTo = doc.emailTo
+  let EmailTo = doc.emailTo;
   //邮件主题
-  let EmailSubject = doc.emailSubject
-
-
-
+  let EmailSubject = doc.emailSubject;
 
   // 爬取数据的url
   const OneUrl = "http://wufazhuce.com/";
   const WeatherUrl = "https://tianqi.moji.com/weather/china/" + local;
-  let PoetUrl = "https://api.gushi.ci/all"
+  let PoetUrl = "https://api.gushi.ci/all";
 
   // 获取古诗词,用作邮件的title
 
   function getPoet() {
-    let p = new Promise(
-      function (resolve, reject) {
-        superagent.get(PoetUrl).end(
-          function (err, res) {
-            if (err) {
-              reject(err)
-            }
-            let raw = JSON.parse(res.text)
-            // console.log('raw data: '+JSON.stringify(raw))
-            resolve(raw.content)
-          }
-        )
-
-      }
-    )
-    return p
+    let p = new Promise(function(resolve, reject) {
+      superagent.get(PoetUrl).end(function(err, res) {
+        if (err) {
+          reject(err);
+        }
+        let raw = JSON.parse(res.text);
+        // console.log('raw data: '+JSON.stringify(raw))
+        resolve(raw.content);
+      });
+    });
+    return p;
   }
 
   // 获取ONE内容
   function getOneData() {
-    let p = new Promise(function (resolve, reject) {
-      superagent.get(OneUrl).end(function (err, res) {
+    let p = new Promise(function(resolve, reject) {
+      superagent.get(OneUrl).end(function(err, res) {
         if (err) {
           reject(err);
         }
@@ -92,44 +87,44 @@ exports.feedMail = async (req, res) => {
             .text()
             .replace(/(^\s*)|(\s*$)/g, "")
         };
-        resolve(todayOneData)
+        resolve(todayOneData);
       });
-    })
-    return p
+    });
+    return p;
   }
 
   // 获取天气提醒
   function getWeatherTips() {
-    let p = new Promise(function (resolve, reject) {
-      superagent.get(WeatherUrl).end(function (err, res) {
+    let p = new Promise(function(resolve, reject) {
+      superagent.get(WeatherUrl).end(function(err, res) {
         if (err) {
           reject(err);
         }
         let threeDaysData = [];
         let weatherTip = "";
         let $ = cheerio.load(res.text);
-        $(".wea_tips").each(function (i, elem) {
+        $(".wea_tips").each(function(i, elem) {
           weatherTip = $(elem)
             .find("em")
             .text();
         });
-        resolve(weatherTip)
+        resolve(weatherTip);
       });
-    })
-    return p
+    });
+    return p;
   }
 
   // 获取天气预报
   function getWeatherData() {
-    let p = new Promise(function (resolve, reject) {
-      superagent.get(WeatherUrl).end(function (err, res) {
+    let p = new Promise(function(resolve, reject) {
+      superagent.get(WeatherUrl).end(function(err, res) {
         if (err) {
           reject(err);
         }
         let threeDaysData = [];
         let weatherTip = "";
         let $ = cheerio.load(res.text);
-        $(".forecast .days").each(function (i, elem) {
+        $(".forecast .days").each(function(i, elem) {
           const SingleDay = $(elem).find("li");
           threeDaysData.push({
             Day: $(SingleDay[0])
@@ -160,10 +155,10 @@ exports.feedMail = async (req, res) => {
               .attr("class")
           });
         });
-        resolve(threeDaysData)
+        resolve(threeDaysData);
       });
     });
-    return p
+    return p;
   }
 
   // 发动邮件
@@ -197,7 +192,8 @@ exports.feedMail = async (req, res) => {
   }
 
   //通过sendGrid进行email 发送
-  function sendMailViaSendGrid(HtmlData, title) {
+  function sendMailViaSendGrid(HtmlData) {
+    let title = HtmlData.subject;
     const template = ejs.compile(
       fs.readFileSync(path.resolve(__dirname, "email.ejs"), "utf8")
     );
@@ -208,12 +204,12 @@ exports.feedMail = async (req, res) => {
       to: EmailTo,
       from: EmailFrom,
       subject: title,
-      html: html,
+      html: html
     };
     sgMail.send(msg).then(() => {
-      console.log('send to ' + EmailTo);
-      res.send('send to' + EmailTo)
-    })
+      console.log("send to " + EmailTo);
+      res.send("send to" + EmailTo);
+    });
   }
 
   // 聚合
@@ -221,7 +217,7 @@ exports.feedMail = async (req, res) => {
     let HtmlData = {};
     // how long with
     let today = new Date();
-    console.log(today)
+    console.log(today);
     let initDay = new Date(startDay);
     let lastDay = Math.floor((today - initDay) / 1000 / 60 / 60 / 24);
     let todaystr =
@@ -235,30 +231,34 @@ exports.feedMail = async (req, res) => {
     HtmlData["yesterDay"] = yesterday;
     HtmlData["yesterDayRate"] = yesterdayRate;
 
-    Promise.all([getOneData(), getWeatherTips(), getWeatherData(), getPoet()]).then(
-      function (data) {
+    Promise.all([
+      getOneData(),
+      getWeatherTips(),
+      getWeatherData(),
+      getPoet(),
+      guanzhi()
+    ])
+      .then(function(data) {
         HtmlData["todayOneData"] = data[0];
         HtmlData["weatherTip"] = data[1];
         HtmlData["threeDaysData"] = data[2];
+        HtmlData["subject"] = data[3];
+        HtmlData["feed"] = [];
+        HtmlData["feed"][0] = data[4];
         switch (doc.emailDelivery) {
-          case 'SMTP':
-            sendMail(HtmlData)
-            break
-          case 'sendGrid':
-            sendMailViaSendGrid(HtmlData, data[3])
-            break
+          case "SMTP":
+            sendMail(HtmlData);
+            break;
+          case "sendGrid":
+            sendMailViaSendGrid(HtmlData);
+            break;
         }
-      }
-    ).catch(function (err) {
-      getAllDataAndSendMail() //再次获取
-      console.log('获取数据失败： ', err);
-    })
+      })
+      .catch(function(err) {
+        getAllDataAndSendMail(); //再次获取
+        console.log("获取数据失败： ", err);
+      });
   }
 
-
   getAllDataAndSendMail();
-
-
-
-
-}
+};
