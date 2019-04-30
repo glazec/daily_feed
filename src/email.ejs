@@ -12,7 +12,7 @@
 <%# 
 在一起的时间
  %>
-    <div style="width:100%; margin: 40px auto;font-size:20px; color:#5f5e5e;text-align:center">
+    <div style="width:100%; margin: 60px auto;font-size:20px; color:#5f5e5e;text-align:center">
         <span>今天是我们在一起的第</span>
         <span style="font-size:24px;color:rgb(221, 73, 73)"  > <%= lastDay %> </span>
         <span>天</span>
@@ -21,10 +21,35 @@
     <%# 
         昨日回顾
     %>
-    <div style="width:100%; margin: 40px auto;font-size:15px; color:#5f5e5e">
+    <div style="width:100%; margin: 60px auto;font-size:15px; color:#5f5e5e">
         <div> <%= yesterDay %> </div>
         <br />
         <div style="color:rgb(221, 73, 73);float:right;padding-right: 40px"><%= yesterDayRate%></div>
+
+    </div>
+
+        <%# 
+        Feed
+    %>
+    <div style="width:100%; margin: 60px auto;font-size:15px; color:#5f5e5e">
+    <% for(var k=0;k<feed.length;k++){%>
+    <div style="margin-bottom:20px;text-align:center;color:#2962ff">
+    <%= feed[k].tag%>
+    </div>
+    <div style='font-size:20px'>
+    <b>
+    <%= feed[k].title%>
+    </b>
+    </div>
+    <% for(var j=0;j<feed[k].description.length;j++){%>
+    <p>
+    <%= feed[k].description[j]%>
+    </p>
+    <%}%>
+    <div>
+    <a href=<%=feed[k].link%> ><%= feed[k].author%>·<%= feed[k].source%> </a>
+    </div>
+    <%}%>
 
     </div>
 
