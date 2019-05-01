@@ -16,11 +16,12 @@ module.exports = function guanzhi() {
         let description = $("description", "item").text();
         description = description.split("</p>").join("\n");
         description = description.split("<p>").join("\n");
-        description = description.split("\n");
+        description = description.split("\n").slice(0,5);
+        description[6]='......'
         let guanzhi = {
           author: author,
           source: source,
-          link: link,
+          link: 'https://meiriyiwen.com',
           description: description,
           title: title,
           tag: tag
