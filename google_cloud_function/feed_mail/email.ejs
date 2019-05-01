@@ -33,7 +33,7 @@
     %>
     <div style="width:100%; margin: 60px auto;font-size:15px; color:#5f5e5e">
     <% for(var k=0;k<feed.length;k++){%>
-    <div style="margin-bottom:20px;text-align:center;color:#2962ff">
+    <div style="margin-bottom:20px;text-align:center;color:#0091ea">
     <%= feed[k].tag%>
     </div>
     <div style='font-size:20px'>
@@ -47,7 +47,7 @@
     </p>
     <%}%>
     <div>
-    <a href=<%=feed[k].link%> ><%= feed[k].author%>·<%= feed[k].source%> </a>
+    <a href=<%=feed[k].link%> style='color:#40c4ff' ><u><i><%= feed[k].author%>·<%= feed[k].source%> </i></u></a>
     </div>
     <%}%>
 
