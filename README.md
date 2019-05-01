@@ -59,3 +59,7 @@ The gmail doesn't support chart element, thus host any input field inaner html.
 - [ ] Pulumi Support
 - [ ] Add configure option
 - [ ] Add test
+- [ ] https://rsshub.app/wikipedia/mainland
+- [ ] https://rsshub.app/ifanr/app
+- [ ] https://rsshub.app/ifanr/coolbuy
+- [ ] https://rsshub.app/coolbuy/newest
